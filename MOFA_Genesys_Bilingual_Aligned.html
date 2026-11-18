@@ -227,7 +227,6 @@
         <input class="call-phone-input" id="callPhone" name="phoneNumber" type="tel" inputmode="tel" autocomplete="tel" placeholder="079XXXXXXXX / +9627XXXXXXXX / +971..." maxlength="32" required>
         <p class="call-hint" id="callPhoneHint">Jordan: 0791234567 · International: +country code and number (e.g. +971...)</p>
         <label class="call-consent"><input type="checkbox" id="callConsent" required><span id="callConsentText">I confirm this is my number and agree to receive a telephone call.</span></label>
-        <div id="callTurnstile" style="margin:14px 0"></div>
         <button type="submit" class="call-submit" id="callSubmit">Request a call</button>
         <p class="call-status" id="callStatus" role="status" aria-live="polite"></p>
       </form>
@@ -306,7 +305,6 @@
     // Config: public backend URL only. Never put a Genesys OAuth secret in this HTML.
 
     const WEBSITE_CALLBACK_ENDPOINT = 'https://callback-api-g1s5.onrender.com/api/click-to-dial';
-    const TURNSTILE_SITE_KEY = 'REPLACE_WITH_PUBLIC_TURNSTILE_SITE_KEY';
     const callStrings = {
       en: {
         title: 'Request a phone call', intro: 'Enter your phone number to request a callback. Jordanian numbers are supported in local format; other countries require +country code.',
@@ -319,7 +317,6 @@
         rejected: 'We could not submit your request. Please try again later or use the chat.',
         rateLimit: 'Please wait before requesting another call.',
         network: 'Cannot connect to the callback service. Please try again shortly.',
-        botCheck: 'Complete the security check before requesting a call.',
         safety: 'For testing only. Do not use for emergencies.', close: 'Close',
       },
       ar: {
@@ -333,27 +330,10 @@
         rejected: 'تعذّر إرسال الطلب. حاول لاحقاً أو تواصل معنا عبر المحادثة.',
         rateLimit: 'يرجى الانتظار قبل إرسال طلب مكالمة آخر.',
         network: 'تعذّر الاتصال بخدمة المكالمات. حاول مرة أخرى بعد قليل.',
-        botCheck: 'يرجى إكمال التحقق الأمني قبل طلب المكالمة.',
         safety: 'للتجربة فقط. ليست خدمة طوارئ.', close: 'إغلاق',
       },
     };
     let callReturnFocus = null;
-    let callTurnstileWidgetId = null;
-    function prepareTurnstile() {
-      if (document.getElementById('callModal').hidden) return;
-      if (callTurnstileWidgetId !== null || !window.turnstile) return;
-      if (TURNSTILE_SITE_KEY.startsWith('REPLACE_')) return;
-      callTurnstileWidgetId = window.turnstile.render('#callTurnstile', {
-        sitekey: TURNSTILE_SITE_KEY,
-        theme: 'auto'
-      });
-    }
-    const turnstileScript = document.createElement('script');
-    turnstileScript.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-    turnstileScript.async = true;
-    turnstileScript.defer = true;
-    turnstileScript.onload = prepareTurnstile;
-    document.head.appendChild(turnstileScript);
     function localizeCallModal() {
       const t = callStrings[document.documentElement.lang === 'ar' ? 'ar' : 'en'];
       const mapping = {
@@ -372,7 +352,6 @@
       callReturnFocus = document.activeElement;
       localizeCallModal();
       document.getElementById('callModal').hidden = false;
-      prepareTurnstile();
       document.getElementById('callPhone').focus();
     }
     function closeCallModal() {
@@ -405,8 +384,6 @@
       function showStatus(message, type) { statusEl.textContent = message; statusEl.className = 'call-status ' + type; }
       if (!number) return showStatus(t.invalid, 'error');
       if (!consent) return showStatus(t.consentRequired, 'error');
-      const turnstileToken = callTurnstileWidgetId !== null && window.turnstile ? window.turnstile.getResponse(callTurnstileWidgetId) : '';
-      if (!turnstileToken) return showStatus(t.botCheck, 'error');
       submit.disabled = true;
       submit.textContent = t.pending;
       showStatus(t.pending, '');
@@ -416,7 +393,7 @@
         const response = await fetch(WEBSITE_CALLBACK_ENDPOINT, {
           method: 'POST', mode: 'cors', credentials: 'omit',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phoneNumber: number, consent: true, turnstileToken }),
+          body: JSON.stringify({ phoneNumber: number, consent: true }),
           signal: controller.signal,
         });
         if (response.ok) {
@@ -431,7 +408,6 @@
       } catch (err) {
         showStatus(t.network, 'error');
       } finally {
-        if (callTurnstileWidgetId !== null && window.turnstile) window.turnstile.reset(callTurnstileWidgetId);
         clearTimeout(timer);
         submit.disabled = false;
         submit.textContent = callStrings[document.documentElement.lang === 'ar' ? 'ar' : 'en'].submit;
