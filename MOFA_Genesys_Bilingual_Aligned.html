@@ -99,6 +99,31 @@
       .footer-inner { flex-direction: column; align-items: flex-start; }
       .topbar-inner { flex-wrap: wrap; }
     }
+    /* Added website callback UI; original Genesys Messenger and layout unchanged */
+    .btn-phone { gap: 9px; }
+    .btn-phone svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .call-modal[hidden] { display: none !important; }
+    .call-modal { position: fixed; inset: 0; z-index: 20000; display: flex; justify-content: center; align-items: center; padding: 20px; background: rgba(8,25,18,.67); }
+    .call-dialog { position: relative; width: min(100%, 450px); background: white; border-radius: 16px; padding: 32px; box-shadow: 0 18px 70px rgba(0,0,0,.28); color: var(--ink); }
+    .call-dialog h2 { font-size: 24px; padding-right: 30px; margin: 0 0 10px; }
+    .call-dialog p { color: var(--muted); line-height: 1.65; font-size: 14px; }
+    .call-close { position: absolute; top: 12px; right: 15px; border: none; background: none; color: var(--ink); cursor: pointer; font-size: 25px; padding: 6px 10px; }
+    .call-dialog label.call-field-label { display: block; font-weight: 700; font-size: 14px; margin: 20px 0 8px; }
+    .call-phone-input { direction: ltr; text-align: left; width: 100%; border: 1px solid #b8c4ba; border-radius: 8px; padding: 14px 13px; font: 16px "Segoe UI", Tahoma, Arial, sans-serif; }
+    .call-phone-input:focus { outline: 2px solid var(--gold); outline-offset: 2px; }
+    .call-hint { margin-top: 7px !important; font-size: 12px !important; }
+    .call-consent { display: flex; align-items: flex-start; gap: 9px; margin: 17px 0; font-size: 13px; line-height: 1.5; color: var(--muted); cursor: pointer; }
+    .call-consent input { width: 17px; height: 17px; flex-shrink: 0; margin-top: 1px; accent-color: var(--green); }
+    .call-submit { width: 100%; background: var(--green); color: white; border: 0; border-radius: 8px; font: 700 15px "Segoe UI",Tahoma,Arial,sans-serif; padding: 14px; cursor: pointer; }
+    .call-submit:hover { background: var(--green-2); }
+    .call-submit:disabled { opacity: .63; cursor: wait; }
+    .call-status { min-height: 0; margin: 12px 0 0; font-size: 13px; line-height: 1.5; }
+    .call-status.success { color: #155f34; }
+    .call-status.error { color: #a32028; }
+    .call-safety-note { font-size: 12px !important; margin-bottom: 0; }
+    [dir="rtl"] .call-dialog h2 { padding-right: 0; padding-left: 30px; }
+    [dir="rtl"] .call-close { right: auto; left: 15px; }
+    @media (max-width: 480px) { .call-dialog { padding: 25px 22px; } }
   </style>
 </head>
 <body>
@@ -152,6 +177,7 @@
           <div class="btn-row">
             <a class="btn btn-gold" href="#services" id="heroPrimary">Explore services</a>
             <button class="btn btn-outline" type="button" onclick="openChat()" id="heroSecondary">Chat with support</button>
+            <button class="btn btn-outline btn-phone" type="button" onclick="openCallModal()" id="heroClickToDial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 3.09 5.18 2 2 0 0 1 5.08 3h3a2 2 0 0 1 2 1.72c.13.96.35 1.9.66 2.8a2 2 0 0 1-.45 2.11L9.02 10.9a16 16 0 0 0 4.08 4.08l1.27-1.27a2 2 0 0 1 2.11-.45c.9.31 1.84.53 2.8.66A2 2 0 0 1 22 16.92z"/></svg><span id="heroClickToDialText">Click to Dial</span></button>
           </div>
         </div>
         <aside class="hero-card">
@@ -190,6 +216,23 @@
       <div id="footerRight">© Demo portal · Not an official government website</div>
     </div>
   </footer>
+
+  <div class="call-modal" id="callModal" role="presentation" hidden>
+    <div class="call-dialog" role="dialog" aria-modal="true" aria-labelledby="callModalTitle" aria-describedby="callModalIntro">
+      <button type="button" class="call-close" id="closeCallModal" aria-label="Close" onclick="closeCallModal()">&times;</button>
+      <h2 id="callModalTitle">Request a phone call</h2>
+      <p id="callModalIntro">Enter your Jordanian phone number and we will request a callback from our support team.</p>
+      <form id="callRequestForm" novalidate>
+        <label class="call-field-label" for="callPhone" id="callPhoneLabel">Jordanian phone number</label>
+        <input class="call-phone-input" id="callPhone" name="phoneNumber" type="tel" inputmode="tel" autocomplete="tel" placeholder="07XXXXXXXX / +9627XXXXXXXX" maxlength="24" required>
+        <p class="call-hint" id="callPhoneHint">Mobile or landline, for example 0791234567 or +962791234567.</p>
+        <label class="call-consent"><input type="checkbox" id="callConsent" required><span id="callConsentText">I confirm this is my number and agree to receive a telephone call.</span></label>
+        <button type="submit" class="call-submit" id="callSubmit">Request a call</button>
+        <p class="call-status" id="callStatus" role="status" aria-live="polite"></p>
+      </form>
+      <p class="call-safety-note" id="callSafetyNote">For testing only. Do not use for emergencies.</p>
+    </div>
+  </div>
 
   <!-- Genesys Cloud Messenger deployment -->
   <script type="text/javascript" charset="utf-8">
@@ -230,7 +273,7 @@
         navServices: 'Services', navConsular: 'Consular Assistance', navContact: 'Contact',
         heroEyebrow: 'YOUR CONNECTION TO JORDAN', heroTitle: 'Foreign affairs and consular services, made easier.',
         heroText: 'Find information about consular services, document requirements, and assistance for Jordanian citizens abroad. This demonstration portal includes a Genesys Cloud digital support widget.',
-        heroPrimary: 'Explore services', heroSecondary: 'Chat with support', cardTitle: 'How can we assist you?',
+        heroPrimary: 'Explore services', heroSecondary: 'Chat with support', heroClickToDialText: 'Click to Dial', cardTitle: 'How can we assist you?',
         cardText: 'Our digital support experience can help visitors find the right information and connect with the appropriate team.',
         cardStatus: 'Digital support widget configured for this demo', servicesEyebrow: 'INFORMATION & SUPPORT',
         servicesTitle: 'Explore our services', servicesText: 'Choose a topic to learn more. These sample service cards are placeholders for your final MOFA Jordan content.',
@@ -247,7 +290,7 @@
         navServices: 'الخدمات', navConsular: 'المساعدة القنصلية', navContact: 'اتصل بنا',
         heroEyebrow: 'تواصلكم مع الأردن', heroTitle: 'الخدمات الخارجية والقنصلية، بطريقة أسهل.',
         heroText: 'تعرّف على الخدمات القنصلية ومتطلبات الوثائق وسبل مساعدة المواطنين الأردنيين في الخارج. تتضمن هذه البوابة التجريبية أداة الدعم الرقمي من Genesys Cloud.',
-        heroPrimary: 'استعراض الخدمات', heroSecondary: 'تحدث مع الدعم', cardTitle: 'كيف يمكننا مساعدتك؟',
+        heroPrimary: 'استعراض الخدمات', heroSecondary: 'تحدث مع الدعم', heroClickToDialText: 'اطلب مكالمة', cardTitle: 'كيف يمكننا مساعدتك؟',
         cardText: 'تساعد تجربة الدعم الرقمي الزوار في الوصول إلى المعلومات المناسبة والتواصل مع الفريق المختص.',
         cardStatus: 'أداة الدعم من Genesys مهيأة لهذه النسخة التجريبية', servicesEyebrow: 'المعلومات والدعم',
         servicesTitle: 'استكشف خدماتنا', servicesText: 'اختر موضوعًا لمعرفة المزيد. هذه البطاقات تجريبية ويمكن استبدالها بالمحتوى المعتمد من وزارة الخارجية الأردنية.',
@@ -259,6 +302,118 @@
         footerRight: '© بوابة تجريبية · ليست موقعًا حكوميًا رسميًا', langBtn: 'English'
       }
     };
+    // Config: public backend URL only. Never put a Genesys OAuth secret in this HTML.
+
+    const WEBSITE_CALLBACK_ENDPOINT = 'https://YOUR-CALLBACK-API.onrender.com/api/click-to-dial';
+    const callStrings = {
+      en: {
+        title: 'Request a phone call', intro: 'Enter your Jordanian phone number and we will request a callback from our support team.',
+        phoneLabel: 'Jordanian phone number', phoneHint: 'Mobile or landline, for example 0791234567 or +962791234567.',
+        consent: 'I confirm this is my number and agree to receive a telephone call.',
+        submit: 'Request a call', pending: 'Submitting your callback request...',
+        success: 'Your callback request was submitted. Please keep your phone available.',
+        invalid: 'Enter a valid Jordanian mobile or landline number.',
+        consentRequired: 'Please confirm that this is your phone number.',
+        rejected: 'We could not submit your request. Please try again later or use the chat.',
+        rateLimit: 'Please wait before requesting another call.',
+        network: 'Cannot connect to the callback service. Please try again shortly.',
+        safety: 'For testing only. Do not use for emergencies.', close: 'Close',
+      },
+      ar: {
+        title: 'اطلب مكالمة هاتفية', intro: 'أدخل رقم هاتفك الأردني لطلب مكالمة من فريق الدعم.',
+        phoneLabel: 'رقم الهاتف الأردني', phoneHint: 'رقم خلوي أو أرضي، مثل 0791234567 أو +962791234567.',
+        consent: 'أؤكد أن هذا رقم هاتفي وأوافق على استلام مكالمة هاتفية.',
+        submit: 'اطلب مكالمة', pending: 'جاري إرسال طلب المكالمة...',
+        success: 'تم إرسال طلب المكالمة. يرجى إبقاء هاتفك متاحاً.',
+        invalid: 'يرجى إدخال رقم هاتف أردني صحيح (خلوي أو أرضي).',
+        consentRequired: 'يرجى تأكيد ملكيتك لرقم الهاتف.',
+        rejected: 'تعذّر إرسال الطلب. حاول لاحقاً أو تواصل معنا عبر المحادثة.',
+        rateLimit: 'يرجى الانتظار قبل إرسال طلب مكالمة آخر.',
+        network: 'تعذّر الاتصال بخدمة المكالمات. حاول مرة أخرى بعد قليل.',
+        safety: 'للتجربة فقط. ليست خدمة طوارئ.', close: 'إغلاق',
+      },
+    };
+    let callReturnFocus = null;
+    function localizeCallModal() {
+      const t = callStrings[document.documentElement.lang === 'ar' ? 'ar' : 'en'];
+      const mapping = {
+        callModalTitle: 'title', callModalIntro: 'intro', callPhoneLabel: 'phoneLabel',
+        callPhoneHint: 'phoneHint', callConsentText: 'consent', callSafetyNote: 'safety',
+      };
+      Object.entries(mapping).forEach(([id, key]) => { document.getElementById(id).textContent = t[key]; });
+      const submit = document.getElementById('callSubmit');
+      if (!submit.disabled) submit.textContent = t.submit;
+      document.getElementById('closeCallModal').setAttribute('aria-label', t.close);
+      document.getElementById('callStatus').textContent = '';
+      document.getElementById('callStatus').className = 'call-status';
+      document.querySelector('.call-dialog').dir = document.documentElement.lang === 'ar' ? 'rtl' : 'ltr';
+    }
+    function openCallModal() {
+      callReturnFocus = document.activeElement;
+      localizeCallModal();
+      document.getElementById('callModal').hidden = false;
+      document.getElementById('callPhone').focus();
+    }
+    function closeCallModal() {
+      document.getElementById('callModal').hidden = true;
+      if (callReturnFocus && typeof callReturnFocus.focus === 'function') callReturnFocus.focus();
+    }
+    document.getElementById('callModal').addEventListener('click', e => {
+      if (e.target.id === 'callModal') closeCallModal();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !document.getElementById('callModal').hidden) closeCallModal();
+    });
+    // Jordan number format: mobile 074–079 and geographic 02/03/05/06, normalized to E.164.
+    function normalizeJordanPhone(input) {
+      let n = String(input || '').trim().replace(/[\s().-]/g, '');
+      if (n.startsWith('00962')) n = '+962' + n.slice(5);
+      else if (n.startsWith('962')) n = '+' + n;
+      else if (n.startsWith('0')) n = '+962' + n.slice(1);
+      if (!/^\+962(?:7[4-9]\d{7}|[2356]\d{7})$/.test(n)) return null;
+      return n;
+    }
+    document.getElementById('callRequestForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const t = callStrings[document.documentElement.lang === 'ar' ? 'ar' : 'en'];
+      const statusEl = document.getElementById('callStatus');
+      const number = normalizeJordanPhone(document.getElementById('callPhone').value);
+      const consent = document.getElementById('callConsent').checked;
+      const submit = document.getElementById('callSubmit');
+      function showStatus(message, type) { statusEl.textContent = message; statusEl.className = 'call-status ' + type; }
+      if (!number) return showStatus(t.invalid, 'error');
+      if (!consent) return showStatus(t.consentRequired, 'error');
+      submit.disabled = true;
+      submit.textContent = t.pending;
+      showStatus(t.pending, '');
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 90000); // Render Free may cold-start.
+      try {
+        const response = await fetch(WEBSITE_CALLBACK_ENDPOINT, {
+          method: 'POST', mode: 'cors', credentials: 'omit',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phoneNumber: number, consent: true }),
+          signal: controller.signal,
+        });
+        if (response.ok) {
+          showStatus(t.success, 'success');
+          document.getElementById('callPhone').value = '';
+          document.getElementById('callConsent').checked = false;
+        } else if (response.status === 429) {
+          showStatus(t.rateLimit, 'error');
+        } else {
+          showStatus(t.rejected, 'error');
+        }
+      } catch (err) {
+        showStatus(t.network, 'error');
+      } finally {
+        clearTimeout(timer);
+        submit.disabled = false;
+        submit.textContent = callStrings[document.documentElement.lang === 'ar' ? 'ar' : 'en'].submit;
+      }
+    });
+
+
     const currentLang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
 
     // Render the saved language on initial load (including after language changes).
