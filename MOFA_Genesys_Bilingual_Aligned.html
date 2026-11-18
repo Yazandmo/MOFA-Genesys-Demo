@@ -1,1175 +1,465 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" dir="ltr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#173d32" />
-    <title>MOFA Jordan | Digital Consular Services Demo</title>
-    <script>
-      // Set the saved page direction before Genesys Messenger initializes.
-      (function () {
-        const savedLanguage = localStorage.getItem("mofaDemoLanguage");
-        const language = savedLanguage === "ar" ? "ar" : "en";
-        document.documentElement.lang = language;
-        document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
-      })();
-    </script>
-    <style>
-      :root {
-        --green: #173d32;
-        --green-2: #245747;
-        --gold: #c6a45b;
-        --cream: #f7f5ef;
-        --ink: #202b27;
-        --muted: #68746e;
-        --line: #e3e6df;
-        --white: #fff;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      html {
-        scroll-behavior: smooth;
-      }
-      body {
-        margin: 0;
-        font-family: "Segoe UI", Tahoma, Arial, sans-serif;
-        color: var(--ink);
-        background: #fff;
-      }
-      a {
-        color: inherit;
-        text-decoration: none;
-      }
-      .topbar {
-        background: var(--green);
-        color: #fff;
-        font-size: 13px;
-      }
-      .topbar-inner {
-        max-width: 1180px;
-        margin: auto;
-        padding: 10px 24px;
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        align-items: center;
-      }
-      .topbar .small-links {
-        display: flex;
-        gap: 18px;
-        opacity: 0.9;
-      }
-      header {
-        border-bottom: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.96);
-      }
-      .nav {
-        max-width: 1180px;
-        margin: auto;
-        padding: 20px 24px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 24px;
-      }
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        min-width: 250px;
-      }
-      .emblem {
-        width: 54px;
-        height: 54px;
-        flex: 0 0 54px;
-        display: grid;
-        place-items: center;
-        background: #fbf8f0;
-        border-radius: 50%;
-        overflow: hidden;
-      }
-      .brand strong {
-        display: block;
-        font-size: 15px;
-        letter-spacing: 0.3px;
-        color: var(--green);
-      }
-      .brand span {
-        display: block;
-        margin-top: 4px;
-        color: var(--muted);
-        font-size: 12px;
-      }
-      .partner-logos {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        margin-left: auto;
-        margin-right: 2px;
-      }
-      .partner-logo {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        white-space: nowrap;
-      }
-      .partner-logo img {
-        display: block;
-        width: auto;
-        max-width: 112px;
-        height: 48px;
-        object-fit: contain;
-      }
-      .partner-logo.genesys img {
-        max-width: 132px;
-      }
-      .partner-label {
-        color: #52635b;
-        font-size: 10px;
-        font-weight: 800;
-        letter-spacing: 0.8px;
-      }
-      .logo-divider {
-        height: 34px;
-        width: 1px;
-        background: var(--line);
-      }
-      .navlinks {
-        display: flex;
-        gap: 26px;
-        align-items: center;
-        font-size: 14px;
-        color: #3d4b44;
-      }
-      .navlinks a:hover {
-        color: var(--green-2);
-      }
-      .lang {
-        border: 1px solid #cbd4cd;
-        background: white;
-        border-radius: 6px;
-        padding: 9px 13px;
-        cursor: pointer;
-        font-weight: 600;
-        color: var(--green);
-      }
-      .hero {
-        background:
-          linear-gradient(
-            110deg,
-            rgba(19, 57, 45, 0.96),
-            rgba(30, 78, 61, 0.91)
-          ),
-          radial-gradient(circle at 80% 20%, #537e5e, #173d32);
-        color: white;
-        overflow: hidden;
-        position: relative;
-      }
-      .hero:after {
-        content: "الأردن";
-        position: absolute;
-        font-size: clamp(100px, 19vw, 260px);
-        font-weight: 800;
-        color: rgba(255, 255, 255, 0.035);
-        left: 54%;
-        top: 12%;
-        transform: rotate(-8deg);
-        pointer-events: none;
-      }
-      .hero-inner {
-        max-width: 1180px;
-        min-height: 430px;
-        margin: auto;
-        padding: 72px 24px;
-        display: grid;
-        grid-template-columns: 1.25fr 0.75fr;
-        align-items: center;
-        gap: 50px;
-        position: relative;
-        z-index: 1;
-      }
-      .eyebrow {
-        color: #e7cf91;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        font-size: 12px;
-        font-weight: 700;
-      }
-      h1 {
-        font-size: clamp(34px, 4vw, 53px);
-        line-height: 1.13;
-        margin: 18px 0;
-        max-width: 650px;
-      }
-      .hero p {
-        color: rgba(255, 255, 255, 0.82);
-        font-size: 17px;
-        line-height: 1.75;
-        max-width: 600px;
-        margin-bottom: 28px;
-      }
-      .btn-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-      }
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 6px;
-        padding: 13px 19px;
-        font-weight: 700;
-        font-size: 14px;
-        cursor: pointer;
-        border: 1px solid transparent;
-      }
-      .btn-gold {
-        background: var(--gold);
-        color: #172b22;
-      }
-      .btn-outline {
-        border-color: rgba(255, 255, 255, 0.55);
-        color: #fff;
-        background: transparent;
-      }
-      .hero-card {
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 14px;
-        padding: 28px;
-        backdrop-filter: blur(4px);
-      }
-      .hero-card .card-icon {
-        font-size: 32px;
-        margin-bottom: 16px;
-      }
-      .hero-card h3 {
-        margin: 0 0 12px;
-        font-size: 20px;
-      }
-      .hero-card p {
-        font-size: 14px;
-        margin: 0 0 20px;
-      }
-      .status {
-        border-top: 1px solid rgba(255, 255, 255, 0.2);
-        padding-top: 16px;
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        font-size: 12px;
-        color: rgba(255, 255, 255, 0.85);
-      }
-      .dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #8fdaa6;
-        display: inline-block;
-      }
-      .section {
-        max-width: 1180px;
-        margin: auto;
-        padding: 68px 24px;
-      }
-      .section-heading {
-        text-align: center;
-        max-width: 680px;
-        margin: 0 auto 36px;
-      }
-      .section-heading .eyebrow {
-        color: #8b7138;
-      }
-      h2 {
-        color: var(--green);
-        font-size: clamp(27px, 3vw, 36px);
-        margin: 12px 0;
-      }
-      .section-heading p {
-        color: var(--muted);
-        line-height: 1.7;
-      }
-      .services {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-      }
-      .service {
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        padding: 25px;
-        transition:
-          transform 0.2s,
-          box-shadow 0.2s;
-        background: white;
-      }
-      .service:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 28px rgba(24, 61, 50, 0.08);
-      }
-      .service-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 10px;
-        background: #edf3ee;
-        display: grid;
-        place-items: center;
-        font-size: 23px;
-        margin-bottom: 18px;
-      }
-      .service h3 {
-        margin: 0 0 10px;
-        color: var(--green);
-        font-size: 18px;
-      }
-      .service p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 14px;
-        line-height: 1.7;
-      }
-      .notice {
-        background: var(--cream);
-        border-top: 1px solid #eeece3;
-        border-bottom: 1px solid #eeece3;
-      }
-      .notice-inner {
-        max-width: 1180px;
-        margin: auto;
-        padding: 28px 24px;
-        display: flex;
-        gap: 18px;
-        align-items: center;
-      }
-      .notice-icon {
-        font-size: 26px;
-      }
-      .notice strong {
-        display: block;
-        color: var(--green);
-        margin-bottom: 5px;
-      }
-      .notice p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 14px;
-        line-height: 1.6;
-      }
-      footer {
-        background: #112f26;
-        color: rgba(255, 255, 255, 0.8);
-      }
-      .footer-inner {
-        max-width: 1180px;
-        margin: auto;
-        padding: 30px 24px;
-        display: flex;
-        justify-content: space-between;
-        gap: 20px;
-        align-items: center;
-        font-size: 12px;
-      }
-      .footer-title {
-        color: white;
-        font-weight: 700;
-        margin-bottom: 5px;
-      }
-      [dir="rtl"] {
-        text-align: right;
-      }
-      [dir="rtl"] .brand,
-      [dir="rtl"] .notice-inner {
-        flex-direction: row;
-      }
-      [dir="rtl"] .hero-card {
-        text-align: right;
-      }
-      @media (max-width: 820px) {
-        .navlinks {
-          display: none;
-        }
-        .partner-logos {
-          gap: 8px;
-        }
-        .partner-logo {
-          gap: 4px;
-        }
-        .partner-logo img {
-          max-width: 70px;
-          height: 34px;
-        }
-        .partner-logo.genesys img {
-          max-width: 82px;
-        }
-        .partner-label {
-          font-size: 8px;
-        }
-        .logo-divider {
-          display: none;
-        }
-        .hero-inner {
-          grid-template-columns: 1fr;
-          gap: 30px;
-          padding-top: 52px;
-          padding-bottom: 52px;
-        }
-        .hero-card {
-          max-width: 520px;
-        }
-        .services {
-          grid-template-columns: 1fr;
-        }
-        .footer-inner {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-        .topbar-inner {
-          flex-wrap: wrap;
-        }
-      }
-      /* Added website callback UI; original Genesys Messenger and layout unchanged */
-      .btn-phone {
-        gap: 9px;
-      }
-      .btn-phone svg {
-        width: 18px;
-        height: 18px;
-        flex-shrink: 0;
-      }
-      .call-modal[hidden] {
-        display: none !important;
-      }
-      .call-modal {
-        position: fixed;
-        inset: 0;
-        z-index: 20000;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        background: rgba(8, 25, 18, 0.67);
-      }
-      .call-dialog {
-        position: relative;
-        width: min(100%, 450px);
-        background: white;
-        border-radius: 16px;
-        padding: 32px;
-        box-shadow: 0 18px 70px rgba(0, 0, 0, 0.28);
-        color: var(--ink);
-      }
-      .call-dialog h2 {
-        font-size: 24px;
-        padding-right: 30px;
-        margin: 0 0 10px;
-      }
-      .call-dialog p {
-        color: var(--muted);
-        line-height: 1.65;
-        font-size: 14px;
-      }
-      .call-close {
-        position: absolute;
-        top: 12px;
-        right: 15px;
-        border: none;
-        background: none;
-        color: var(--ink);
-        cursor: pointer;
-        font-size: 25px;
-        padding: 6px 10px;
-      }
-      .call-dialog label.call-field-label {
-        display: block;
-        font-weight: 700;
-        font-size: 14px;
-        margin: 20px 0 8px;
-      }
-      .call-phone-input {
-        direction: ltr;
-        text-align: left;
-        width: 100%;
-        border: 1px solid #b8c4ba;
-        border-radius: 8px;
-        padding: 14px 13px;
-        font:
-          16px "Segoe UI",
-          Tahoma,
-          Arial,
-          sans-serif;
-      }
-      .call-phone-input:focus {
-        outline: 2px solid var(--gold);
-        outline-offset: 2px;
-      }
-      .call-hint {
-        margin-top: 7px !important;
-        font-size: 12px !important;
-      }
-      .call-consent {
-        display: flex;
-        align-items: flex-start;
-        gap: 9px;
-        margin: 17px 0;
-        font-size: 13px;
-        line-height: 1.5;
-        color: var(--muted);
-        cursor: pointer;
-      }
-      .call-consent input {
-        width: 17px;
-        height: 17px;
-        flex-shrink: 0;
-        margin-top: 1px;
-        accent-color: var(--green);
-      }
-      .call-submit {
-        width: 100%;
-        background: var(--green);
-        color: white;
-        border: 0;
-        border-radius: 8px;
-        font:
-          700 15px "Segoe UI",
-          Tahoma,
-          Arial,
-          sans-serif;
-        padding: 14px;
-        cursor: pointer;
-      }
-      .call-submit:hover {
-        background: var(--green-2);
-      }
-      .call-submit:disabled {
-        opacity: 0.63;
-        cursor: wait;
-      }
-      .call-status {
-        min-height: 0;
-        margin: 12px 0 0;
-        font-size: 13px;
-        line-height: 1.5;
-      }
-      .call-status.success {
-        color: #155f34;
-      }
-      .call-status.error {
-        color: #a32028;
-      }
-      .call-safety-note {
-        font-size: 12px !important;
-        margin-bottom: 0;
-      }
-      [dir="rtl"] .call-dialog h2 {
-        padding-right: 0;
-        padding-left: 30px;
-      }
-      [dir="rtl"] .call-close {
-        right: auto;
-        left: 15px;
-      }
-      @media (max-width: 480px) {
-        .call-dialog {
-          padding: 25px 22px;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="topbar">
-      <div class="topbar-inner">
-        <div id="topText">
-          The Hashemite Kingdom of Jordan · Ministry of Foreign Affairs and
-          Expatriates
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#173d32" />
+  <title>MOFA Jordan | Digital Consular Services Demo</title>
+  <script>
+    // Set the saved page direction before Genesys Messenger initializes.
+    (function () {
+      const savedLanguage = localStorage.getItem('mofaDemoLanguage');
+      const language = savedLanguage === 'ar' ? 'ar' : 'en';
+      document.documentElement.lang = language;
+      document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+    })();
+  </script>
+  <style>
+    :root {
+      --green: #173d32;
+      --green-2: #245747;
+      --gold: #c6a45b;
+      --cream: #f7f5ef;
+      --ink: #202b27;
+      --muted: #68746e;
+      --line: #e3e6df;
+      --white: #fff;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: var(--ink); background: #fff; }
+    a { color: inherit; text-decoration: none; }
+    .topbar { background: var(--green); color: #fff; font-size: 13px; }
+    .topbar-inner { max-width: 1180px; margin: auto; padding: 10px 24px; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .topbar .small-links { display: flex; gap: 18px; opacity: .9; }
+    header { border-bottom: 1px solid var(--line); background: rgba(255,255,255,.96); }
+    .nav { max-width: 1180px; margin: auto; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 250px; }
+    .emblem { width: 54px; height: 54px; flex: 0 0 54px; display: grid; place-items: center; background: #fbf8f0; border-radius: 50%; overflow: hidden; }
+    .brand strong { display: block; font-size: 15px; letter-spacing: .3px; color: var(--green); }
+    .brand span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+    .partner-logos { display: flex; align-items: center; gap: 14px; margin-left: auto; margin-right: 2px; }
+    .partner-logo { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+    .partner-logo img { display: block; width: auto; max-width: 112px; height: 48px; object-fit: contain; }
+    .partner-logo.genesys img { max-width: 132px; }
+    .partner-label { color: #52635b; font-size: 10px; font-weight: 800; letter-spacing: .8px; }
+    .logo-divider { height: 34px; width: 1px; background: var(--line); }
+    .navlinks { display: flex; gap: 26px; align-items: center; font-size: 14px; color: #3d4b44; }
+    .navlinks a:hover { color: var(--green-2); }
+    .lang { border: 1px solid #cbd4cd; background: white; border-radius: 6px; padding: 9px 13px; cursor: pointer; font-weight: 600; color: var(--green); }
+    .hero { background: linear-gradient(110deg, rgba(19,57,45,.96), rgba(30,78,61,.91)), radial-gradient(circle at 80% 20%, #537e5e, #173d32); color: white; overflow: hidden; position: relative; }
+    .hero:after { content: "الأردن"; position: absolute; font-size: clamp(100px, 19vw, 260px); font-weight: 800; color: rgba(255,255,255,.035); left: 54%; top: 12%; transform: rotate(-8deg); pointer-events: none; }
+    .hero-inner { max-width: 1180px; min-height: 430px; margin: auto; padding: 72px 24px; display: grid; grid-template-columns: 1.25fr .75fr; align-items: center; gap: 50px; position: relative; z-index: 1; }
+    .eyebrow { color: #e7cf91; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; font-weight: 700; }
+    h1 { font-size: clamp(34px, 4vw, 53px); line-height: 1.13; margin: 18px 0; max-width: 650px; }
+    .hero p { color: rgba(255,255,255,.82); font-size: 17px; line-height: 1.75; max-width: 600px; margin-bottom: 28px; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 13px 19px; font-weight: 700; font-size: 14px; cursor: pointer; border: 1px solid transparent; }
+    .btn-gold { background: var(--gold); color: #172b22; }
+    .btn-outline { border-color: rgba(255,255,255,.55); color: #fff; background: transparent; }
+    .hero-card { border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.08); border-radius: 14px; padding: 28px; backdrop-filter: blur(4px); }
+    .hero-card .card-icon { font-size: 32px; margin-bottom: 16px; }
+    .hero-card h3 { margin: 0 0 12px; font-size: 20px; }
+    .hero-card p { font-size: 14px; margin: 0 0 20px; }
+    .status { border-top: 1px solid rgba(255,255,255,.2); padding-top: 16px; display: flex; align-items: center; gap: 9px; font-size: 12px; color: rgba(255,255,255,.85); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #8fdaa6; display: inline-block; }
+    .section { max-width: 1180px; margin: auto; padding: 68px 24px; }
+    .section-heading { text-align: center; max-width: 680px; margin: 0 auto 36px; }
+    .section-heading .eyebrow { color: #8b7138; }
+    h2 { color: var(--green); font-size: clamp(27px, 3vw, 36px); margin: 12px 0; }
+    .section-heading p { color: var(--muted); line-height: 1.7; }
+    .services { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .service { border: 1px solid var(--line); border-radius: 12px; padding: 25px; transition: transform .2s, box-shadow .2s; background: white; }
+    .service:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(24,61,50,.08); }
+    .service-icon { width: 48px; height: 48px; border-radius: 10px; background: #edf3ee; display: grid; place-items: center; font-size: 23px; margin-bottom: 18px; }
+    .service h3 { margin: 0 0 10px; color: var(--green); font-size: 18px; }
+    .service p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+    .notice { background: var(--cream); border-top: 1px solid #eeece3; border-bottom: 1px solid #eeece3; }
+    .notice-inner { max-width: 1180px; margin: auto; padding: 28px 24px; display: flex; gap: 18px; align-items: center; }
+    .notice-icon { font-size: 26px; }
+    .notice strong { display: block; color: var(--green); margin-bottom: 5px; }
+    .notice p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+    footer { background: #112f26; color: rgba(255,255,255,.8); }
+    .footer-inner { max-width: 1180px; margin: auto; padding: 30px 24px; display: flex; justify-content: space-between; gap: 20px; align-items: center; font-size: 12px; }
+    .footer-title { color: white; font-weight: 700; margin-bottom: 5px; }
+    [dir="rtl"] { text-align: right; }
+    [dir="rtl"] .brand, [dir="rtl"] .notice-inner { flex-direction: row; }
+    [dir="rtl"] .hero-card { text-align: right; }
+    @media (max-width: 820px) {
+      .navlinks { display: none; }
+      .partner-logos { gap: 8px; }
+      .partner-logo { gap: 4px; }
+      .partner-logo img { max-width: 70px; height: 34px; }
+      .partner-logo.genesys img { max-width: 82px; }
+      .partner-label { font-size: 8px; }
+      .logo-divider { display: none; }
+      .hero-inner { grid-template-columns: 1fr; gap: 30px; padding-top: 52px; padding-bottom: 52px; }
+      .hero-card { max-width: 520px; }
+      .services { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+      .topbar-inner { flex-wrap: wrap; }
+    }
+    /* Added website callback UI; original Genesys Messenger and layout unchanged */
+    .btn-phone { gap: 9px; }
+    .btn-phone svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .call-modal[hidden] { display: none !important; }
+    .call-modal { position: fixed; inset: 0; z-index: 20000; display: flex; justify-content: center; align-items: center; padding: 20px; background: rgba(8,25,18,.67); }
+    .call-dialog { position: relative; width: min(100%, 450px); background: white; border-radius: 16px; padding: 32px; box-shadow: 0 18px 70px rgba(0,0,0,.28); color: var(--ink); }
+    .call-dialog h2 { font-size: 24px; padding-right: 30px; margin: 0 0 10px; }
+    .call-dialog p { color: var(--muted); line-height: 1.65; font-size: 14px; }
+    .call-close { position: absolute; top: 12px; right: 15px; border: none; background: none; color: var(--ink); cursor: pointer; font-size: 25px; padding: 6px 10px; }
+    .call-dialog label.call-field-label { display: block; font-weight: 700; font-size: 14px; margin: 20px 0 8px; }
+    .call-phone-input { direction: ltr; text-align: left; width: 100%; border: 1px solid #b8c4ba; border-radius: 8px; padding: 14px 13px; font: 16px "Segoe UI", Tahoma, Arial, sans-serif; }
+    .call-phone-input:focus { outline: 2px solid var(--gold); outline-offset: 2px; }
+    .call-hint { margin-top: 7px !important; font-size: 12px !important; }
+    .call-consent { display: flex; align-items: flex-start; gap: 9px; margin: 17px 0; font-size: 13px; line-height: 1.5; color: var(--muted); cursor: pointer; }
+    .call-consent input { width: 17px; height: 17px; flex-shrink: 0; margin-top: 1px; accent-color: var(--green); }
+    .call-submit { width: 100%; background: var(--green); color: white; border: 0; border-radius: 8px; font: 700 15px "Segoe UI",Tahoma,Arial,sans-serif; padding: 14px; cursor: pointer; }
+    .call-submit:hover { background: var(--green-2); }
+    .call-submit:disabled { opacity: .63; cursor: wait; }
+    .call-status { min-height: 0; margin: 12px 0 0; font-size: 13px; line-height: 1.5; }
+    .call-status.success { color: #155f34; }
+    .call-status.error { color: #a32028; }
+    .call-safety-note { font-size: 12px !important; margin-bottom: 0; }
+    [dir="rtl"] .call-dialog h2 { padding-right: 0; padding-left: 30px; }
+    [dir="rtl"] .call-close { right: auto; left: 15px; }
+    @media (max-width: 480px) { .call-dialog { padding: 25px 22px; } }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div id="topText">The Hashemite Kingdom of Jordan · Ministry of Foreign Affairs and Expatriates</div>
+      <div class="small-links"><span>Official Services Demo</span><span>Contact &amp; Support</span></div>
+    </div>
+  </div>
+  <header>
+    <nav class="nav">
+      <a class="brand" href="#" aria-label="MOFA Jordan demo home">
+        <div class="emblem" aria-label="MOFA Jordan logo-style emblem">
+          <svg viewBox="0 0 64 64" width="54" height="54" role="img" aria-label="Jordan-inspired ministry emblem">
+            <circle cx="32" cy="32" r="29" fill="#fffdf7" stroke="#c6a45b" stroke-width="2"/>
+            <path d="M13 20 L51 20 L51 44 L13 44 Z" fill="#fff" stroke="#d8d8d0" stroke-width=".6"/>
+            <path d="M13 20 L51 20 L51 28 L13 28 Z" fill="#111"/><path d="M13 28 L51 28 L51 36 L13 36 Z" fill="#fff"/><path d="M13 36 L51 36 L51 44 L13 44 Z" fill="#287447"/>
+            <path d="M13 20 L29 32 L13 44 Z" fill="#b72c35"/><path d="M19 29 l1.1 2.1 2.3.3-1.7 1.6.4 2.3-2.1-1.1-2.1 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="#fff"/>
+            <circle cx="32" cy="32" r="29" fill="none" stroke="#c6a45b" stroke-width="1.2"/>
+          </svg>
         </div>
-        <div class="small-links">
-          <span>Official Services Demo</span><span>Contact &amp; Support</span>
+        <div><strong id="brandTitle">MINISTRY OF FOREIGN AFFAIRS</strong><span id="brandSub">The Hashemite Kingdom of Jordan · Demo Portal</span></div>
+      </a>
+      <div class="navlinks">
+        <a href="#services" id="navServices">Services</a>
+        <a href="#consular" id="navConsular">Consular Assistance</a>
+        <a href="#contact" id="navContact">Contact</a>
+      </div>
+      <div class="partner-logos" aria-label="MOFA JO and Genesys Cloud logos">
+        <div class="partner-logo mofa" aria-label="MOFA JO logo">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRec8nKvkIKrPq5NJo_6NznFyUCpSao0NR8JnlorWqXIA&amp;s=10" alt="MOFA Jordan logo" referrerpolicy="no-referrer">
+          <span class="partner-label">MOFA JO</span>
+        </div>
+        <div class="logo-divider" aria-hidden="true"></div>
+        <div class="partner-logo genesys" aria-label="Genesys Cloud logo">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_2utsqbfmDgMGJM0HFQPtqtMbPrefCC3MhyTKYSantw&amp;s=10" alt="Genesys Cloud logo" referrerpolicy="no-referrer">
+          <span class="partner-label">GENESYS CLOUD</span>
         </div>
       </div>
-    </div>
-    <header>
-      <nav class="nav">
-        <a class="brand" href="#" aria-label="MOFA Jordan demo home">
-          <div class="emblem" aria-label="MOFA Jordan logo-style emblem">
-            <svg
-              viewBox="0 0 64 64"
-              width="54"
-              height="54"
-              role="img"
-              aria-label="Jordan-inspired ministry emblem"
-            >
-              <circle
-                cx="32"
-                cy="32"
-                r="29"
-                fill="#fffdf7"
-                stroke="#c6a45b"
-                stroke-width="2"
-              />
-              <path
-                d="M13 20 L51 20 L51 44 L13 44 Z"
-                fill="#fff"
-                stroke="#d8d8d0"
-                stroke-width=".6"
-              />
-              <path d="M13 20 L51 20 L51 28 L13 28 Z" fill="#111" />
-              <path d="M13 28 L51 28 L51 36 L13 36 Z" fill="#fff" />
-              <path d="M13 36 L51 36 L51 44 L13 44 Z" fill="#287447" />
-              <path d="M13 20 L29 32 L13 44 Z" fill="#b72c35" />
-              <path
-                d="M19 29 l1.1 2.1 2.3.3-1.7 1.6.4 2.3-2.1-1.1-2.1 1.1.4-2.3-1.7-1.6 2.3-.3z"
-                fill="#fff"
-              />
-              <circle
-                cx="32"
-                cy="32"
-                r="29"
-                fill="none"
-                stroke="#c6a45b"
-                stroke-width="1.2"
-              />
-            </svg>
-          </div>
-          <div>
-            <strong id="brandTitle">MINISTRY OF FOREIGN AFFAIRS</strong
-            ><span id="brandSub"
-              >The Hashemite Kingdom of Jordan · Demo Portal</span
-            >
-          </div>
-        </a>
-        <div class="navlinks">
-          <a href="#services" id="navServices">Services</a>
-          <a href="#consular" id="navConsular">Consular Assistance</a>
-          <a href="#contact" id="navContact">Contact</a>
-        </div>
-        <div class="partner-logos" aria-label="MOFA JO and Genesys Cloud logos">
-          <div class="partner-logo mofa" aria-label="MOFA JO logo">
-            <img
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRec8nKvkIKrPq5NJo_6NznFyUCpSao0NR8JnlorWqXIA&amp;s=10"
-              alt="MOFA Jordan logo"
-              referrerpolicy="no-referrer"
-            />
-            <span class="partner-label">MOFA JO</span>
-          </div>
-          <div class="logo-divider" aria-hidden="true"></div>
-          <div class="partner-logo genesys" aria-label="Genesys Cloud logo">
-            <img
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_2utsqbfmDgMGJM0HFQPtqtMbPrefCC3MhyTKYSantw&amp;s=10"
-              alt="Genesys Cloud logo"
-              referrerpolicy="no-referrer"
-            />
-            <span class="partner-label">GENESYS CLOUD</span>
-          </div>
-        </div>
-        <button class="lang" id="langBtn" type="button">العربية</button>
-      </nav>
-    </header>
+      <button class="lang" id="langBtn" type="button">العربية</button>
+    </nav>
+  </header>
 
-    <main>
-      <section class="hero">
-        <div class="hero-inner">
-          <div>
-            <div class="eyebrow" id="heroEyebrow">
-              YOUR CONNECTION TO JORDAN
-            </div>
-            <h1 id="heroTitle">
-              Foreign affairs and consular services, made easier.
-            </h1>
-            <p id="heroText">
-              Find information about consular services, document requirements,
-              and assistance for Jordanian citizens abroad. This demonstration
-              portal includes a Genesys Cloud digital support widget.
-            </p>
-            <div class="btn-row">
-              <a class="btn btn-gold" href="#services" id="heroPrimary"
-                >Explore services</a
-              >
-              <button
-                class="btn btn-outline"
-                type="button"
-                onclick="openChat()"
-                id="heroSecondary"
-              >
-                Chat with support
-              </button>
-              <button
-                class="btn btn-outline btn-phone"
-                type="button"
-                onclick="openCallModal()"
-                id="heroClickToDial"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 3.09 5.18 2 2 0 0 1 5.08 3h3a2 2 0 0 1 2 1.72c.13.96.35 1.9.66 2.8a2 2 0 0 1-.45 2.11L9.02 10.9a16 16 0 0 0 4.08 4.08l1.27-1.27a2 2 0 0 1 2.11-.45c.9.31 1.84.53 2.8.66A2 2 0 0 1 22 16.92z"
-                  /></svg
-                ><span id="heroClickToDialText">Click to Dial</span>
-              </button>
-            </div>
-          </div>
-          <aside class="hero-card">
-            <div class="card-icon">🌐</div>
-            <h3 id="cardTitle">How can we assist you?</h3>
-            <p id="cardText">
-              Our digital support experience can help visitors find the right
-              information and connect with the appropriate team.
-            </p>
-            <div class="status">
-              <span class="dot"></span
-              ><span id="cardStatus"
-                >Digital support widget configured for this demo</span
-              >
-            </div>
-          </aside>
-        </div>
-      </section>
-
-      <section class="section" id="services">
-        <div class="section-heading">
-          <div class="eyebrow" id="servicesEyebrow">
-            INFORMATION &amp; SUPPORT
-          </div>
-          <h2 id="servicesTitle">Explore our services</h2>
-          <p id="servicesText">
-            Choose a topic to learn more. These sample service cards are
-            placeholders for your final MOFA Jordan content.
-          </p>
-        </div>
-        <div class="services">
-          <article class="service">
-            <div class="service-icon">🛂</div>
-            <h3 id="s1Title">Passports &amp; Travel Documents</h3>
-            <p id="s1Text">
-              General information about travel documents, renewals, and related
-              consular procedures.
-            </p>
-          </article>
-          <article class="service">
-            <div class="service-icon">📄</div>
-            <h3 id="s2Title">Attestations &amp; Documents</h3>
-            <p id="s2Text">
-              Learn about document attestation, certificates, and the
-              information you may need before applying.
-            </p>
-          </article>
-          <article class="service">
-            <div class="service-icon">🤝</div>
-            <h3 id="s3Title">Citizen Assistance Abroad</h3>
-            <p id="s3Text">
-              Find guidance on contacting a Jordanian embassy or consulate for
-              assistance while overseas.
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <section class="notice" id="consular">
-        <div class="notice-inner">
-          <div class="notice-icon">ℹ️</div>
-          <div>
-            <strong id="noticeTitle">Demonstration website</strong>
-            <p id="noticeText">
-              This is a sample deployment page for testing the Genesys Cloud web
-              messenger. It is not an official government website, and the
-              sample service information should be replaced with approved MOFA
-              Jordan content before public use.
-            </p>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer id="contact">
-      <div class="footer-inner">
+  <main>
+    <section class="hero">
+      <div class="hero-inner">
         <div>
-          <div class="footer-title" id="footerTitle">
-            MOFA Jordan · Digital Services Demo
-          </div>
-          <div id="footerText">
-            A prototype page for Genesys Cloud deployment and widget validation.
+          <div class="eyebrow" id="heroEyebrow">YOUR CONNECTION TO JORDAN</div>
+          <h1 id="heroTitle">Foreign affairs and consular services, made easier.</h1>
+          <p id="heroText">Find information about consular services, document requirements, and assistance for Jordanian citizens abroad. This demonstration portal includes a Genesys Cloud digital support widget.</p>
+          <div class="btn-row">
+            <a class="btn btn-gold" href="#services" id="heroPrimary">Explore services</a>
+            <button class="btn btn-outline" type="button" onclick="openChat()" id="heroSecondary">Chat with support</button>
+            <button class="btn btn-outline btn-phone" type="button" onclick="openCallModal()" id="heroClickToDial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 3.09 5.18 2 2 0 0 1 5.08 3h3a2 2 0 0 1 2 1.72c.13.96.35 1.9.66 2.8a2 2 0 0 1-.45 2.11L9.02 10.9a16 16 0 0 0 4.08 4.08l1.27-1.27a2 2 0 0 1 2.11-.45c.9.31 1.84.53 2.8.66A2 2 0 0 1 22 16.92z"/></svg><span id="heroClickToDialText">Click to Dial</span></button>
           </div>
         </div>
-        <div id="footerRight">
-          © Demo portal · Not an official government website
-        </div>
+        <aside class="hero-card">
+          <div class="card-icon">🌐</div>
+          <h3 id="cardTitle">How can we assist you?</h3>
+          <p id="cardText">Our digital support experience can help visitors find the right information and connect with the appropriate team.</p>
+          <div class="status"><span class="dot"></span><span id="cardStatus">Digital support widget configured for this demo</span></div>
+        </aside>
       </div>
-    </footer>
+    </section>
 
-    <div class="call-modal" id="callModal" role="presentation" hidden>
-      <div
-        class="call-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="callModalTitle"
-        aria-describedby="callModalIntro"
-      >
-        <button
-          type="button"
-          class="call-close"
-          id="closeCallModal"
-          aria-label="Close"
-          onclick="closeCallModal()"
-        >
-          &times;
-        </button>
-        <h2 id="callModalTitle">Request a phone call</h2>
-        <p id="callModalIntro">
-          Enter your Jordanian phone number and we will request a callback from
-          our support team.
-        </p>
-        <form id="callRequestForm" novalidate>
-          <label class="call-field-label" for="callPhone" id="callPhoneLabel"
-            >Jordanian phone number</label
-          >
-          <input
-            class="call-phone-input"
-            id="callPhone"
-            name="phoneNumber"
-            type="tel"
-            inputmode="tel"
-            autocomplete="tel"
-            placeholder="07XXXXXXXX / +9627XXXXXXXX"
-            maxlength="24"
-            required
-          />
-          <p class="call-hint" id="callPhoneHint">
-            Mobile or landline, for example 0791234567 or +962791234567.
-          </p>
-          <label class="call-consent"
-            ><input type="checkbox" id="callConsent" required /><span
-              id="callConsentText"
-              >I confirm this is my number and agree to receive a telephone
-              call.</span
-            ></label
-          >
-          <button type="submit" class="call-submit" id="callSubmit">
-            Request a call
-          </button>
-          <p
-            class="call-status"
-            id="callStatus"
-            role="status"
-            aria-live="polite"
-          ></p>
-        </form>
-        <p class="call-safety-note" id="callSafetyNote">
-          For testing only. Do not use for emergencies.
-        </p>
+    <section class="section" id="services">
+      <div class="section-heading">
+        <div class="eyebrow" id="servicesEyebrow">INFORMATION &amp; SUPPORT</div>
+        <h2 id="servicesTitle">Explore our services</h2>
+        <p id="servicesText">Choose a topic to learn more. These sample service cards are placeholders for your final MOFA Jordan content.</p>
       </div>
+      <div class="services">
+        <article class="service"><div class="service-icon">🛂</div><h3 id="s1Title">Passports &amp; Travel Documents</h3><p id="s1Text">General information about travel documents, renewals, and related consular procedures.</p></article>
+        <article class="service"><div class="service-icon">📄</div><h3 id="s2Title">Attestations &amp; Documents</h3><p id="s2Text">Learn about document attestation, certificates, and the information you may need before applying.</p></article>
+        <article class="service"><div class="service-icon">🤝</div><h3 id="s3Title">Citizen Assistance Abroad</h3><p id="s3Text">Find guidance on contacting a Jordanian embassy or consulate for assistance while overseas.</p></article>
+      </div>
+    </section>
+
+    <section class="notice" id="consular">
+      <div class="notice-inner">
+        <div class="notice-icon">ℹ️</div>
+        <div><strong id="noticeTitle">Demonstration website</strong><p id="noticeText">This is a sample deployment page for testing the Genesys Cloud web messenger. It is not an official government website, and the sample service information should be replaced with approved MOFA Jordan content before public use.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="contact">
+    <div class="footer-inner">
+      <div><div class="footer-title" id="footerTitle">MOFA Jordan · Digital Services Demo</div><div id="footerText">A prototype page for Genesys Cloud deployment and widget validation.</div></div>
+      <div id="footerRight">© Demo portal · Not an official government website</div>
     </div>
+  </footer>
 
-    <!-- Genesys Cloud Messenger deployment -->
-    <script type="text/javascript" charset="utf-8">
-      (function (g, e, n, es, ys) {
-        g["_genesysJs"] = e;
-        g[e] =
-          g[e] ||
-          function () {
-            (g[e].q = g[e].q || []).push(arguments);
-          };
-        g[e].t = 1 * new Date();
-        g[e].c = es;
-        ys = document.createElement("script");
-        ys.async = 1;
-        ys.src = n;
-        ys.charset = "utf-8";
-        document.head.appendChild(ys);
-      })(
-        window,
-        "Genesys",
-        "https://apps.mypurecloud.ie/genesys-bootstrap/genesys.min.js",
-        {
-          environment: "prod-euw1",
-          deploymentId: "21cf67fa-1476-480a-b85c-d9510adf19f8",
-        },
-      );
-    </script>
+  <div class="call-modal" id="callModal" role="presentation" hidden>
+    <div class="call-dialog" role="dialog" aria-modal="true" aria-labelledby="callModalTitle" aria-describedby="callModalIntro">
+      <button type="button" class="call-close" id="closeCallModal" aria-label="Close" onclick="closeCallModal()">&times;</button>
+      <h2 id="callModalTitle">Request a phone call</h2>
+      <p id="callModalIntro">Enter your phone number to request a callback. Jordanian numbers are supported in local format; other countries require +country code.</p>
+      <form id="callRequestForm" novalidate>
+        <label class="call-field-label" for="callPhone" id="callPhoneLabel">Phone number</label>
+        <input class="call-phone-input" id="callPhone" name="phoneNumber" type="tel" inputmode="tel" autocomplete="tel" placeholder="079XXXXXXXX / +9627XXXXXXXX / +971..." maxlength="32" required>
+        <p class="call-hint" id="callPhoneHint">Jordan: 0791234567 · International: +country code and number (e.g. +971...)</p>
+        <label class="call-consent"><input type="checkbox" id="callConsent" required><span id="callConsentText">I confirm this is my number and agree to receive a telephone call.</span></label>
+        <div id="callTurnstile" style="margin:14px 0"></div>
+        <button type="submit" class="call-submit" id="callSubmit">Request a call</button>
+        <p class="call-status" id="callStatus" role="status" aria-live="polite"></p>
+      </form>
+      <p class="call-safety-note" id="callSafetyNote">For testing only. Do not use for emergencies.</p>
+    </div>
+  </div>
 
-    <script>
-      function openChat() {
-        // Ask the configured Genesys Messenger to open, if supported by this deployment.
-        try {
-          if (typeof window.Genesys === "function") {
-            window.Genesys("command", "Messenger.open");
-          } else {
-            alert(
-              document.documentElement.lang === "ar"
-                ? "أداة Genesys ما زالت قيد التحميل. يرجى المحاولة بعد لحظات."
-                : "The Genesys widget is still loading. Please try again in a moment.",
-            );
-          }
-        } catch (e) {
-          console.warn("Could not open Genesys Messenger automatically:", e);
+  <!-- Genesys Cloud Messenger deployment -->
+  <script type="text/javascript" charset="utf-8">
+    (function (g, e, n, es, ys) {
+      g['_genesysJs'] = e;
+      g[e] = g[e] || function () {
+        (g[e].q = g[e].q || []).push(arguments)
+      };
+      g[e].t = 1 * new Date();
+      g[e].c = es;
+      ys = document.createElement('script'); ys.async = 1; ys.src = n; ys.charset = 'utf-8'; document.head.appendChild(ys);
+    })(window, 'Genesys', 'https://apps.mypurecloud.ie/genesys-bootstrap/genesys.min.js', {
+      environment: 'prod-euw1',
+      deploymentId: '21cf67fa-1476-480a-b85c-d9510adf19f8'
+    });
+  </script>
+
+  <script>
+    function openChat() {
+      // Ask the configured Genesys Messenger to open, if supported by this deployment.
+      try {
+        if (typeof window.Genesys === 'function') {
+          window.Genesys('command', 'Messenger.open');
+        } else {
+          alert(document.documentElement.lang === 'ar'
+            ? 'أداة Genesys ما زالت قيد التحميل. يرجى المحاولة بعد لحظات.'
+            : 'The Genesys widget is still loading. Please try again in a moment.');
         }
+      } catch (e) {
+        console.warn('Could not open Genesys Messenger automatically:', e);
       }
+    }
 
-      const translations = {
-        en: {
-          topText:
-            "The Hashemite Kingdom of Jordan · Ministry of Foreign Affairs and Expatriates",
-          brandTitle: "MINISTRY OF FOREIGN AFFAIRS",
-          brandSub: "The Hashemite Kingdom of Jordan · Demo Portal",
-          navServices: "Services",
-          navConsular: "Consular Assistance",
-          navContact: "Contact",
-          heroEyebrow: "YOUR CONNECTION TO JORDAN",
-          heroTitle: "Foreign affairs and consular services, made easier.",
-          heroText:
-            "Find information about consular services, document requirements, and assistance for Jordanian citizens abroad. This demonstration portal includes a Genesys Cloud digital support widget.",
-          heroPrimary: "Explore services",
-          heroSecondary: "Chat with support",
-          heroClickToDialText: "Click to Dial",
-          cardTitle: "How can we assist you?",
-          cardText:
-            "Our digital support experience can help visitors find the right information and connect with the appropriate team.",
-          cardStatus: "Digital support widget configured for this demo",
-          servicesEyebrow: "INFORMATION & SUPPORT",
-          servicesTitle: "Explore our services",
-          servicesText:
-            "Choose a topic to learn more. These sample service cards are placeholders for your final MOFA Jordan content.",
-          s1Title: "Passports & Travel Documents",
-          s1Text:
-            "General information about travel documents, renewals, and related consular procedures.",
-          s2Title: "Attestations & Documents",
-          s2Text:
-            "Learn about document attestation, certificates, and the information you may need before applying.",
-          s3Title: "Citizen Assistance Abroad",
-          s3Text:
-            "Find guidance on contacting a Jordanian embassy or consulate for assistance while overseas.",
-          noticeTitle: "Demonstration website",
-          noticeText:
-            "This is a sample deployment page for testing the Genesys Cloud web messenger. It is not an official government website, and the sample service information should be replaced with approved MOFA Jordan content before public use.",
-          footerTitle: "MOFA Jordan · Digital Services Demo",
-          footerText:
-            "A prototype page for Genesys Cloud deployment and widget validation.",
-          footerRight: "© Demo portal · Not an official government website",
-          langBtn: "العربية",
-        },
-        ar: {
-          topText: "المملكة الأردنية الهاشمية · وزارة الخارجية وشؤون المغتربين",
-          brandTitle: "وزارة الخارجية وشؤون المغتربين",
-          brandSub: "المملكة الأردنية الهاشمية · بوابة تجريبية",
-          navServices: "الخدمات",
-          navConsular: "المساعدة القنصلية",
-          navContact: "اتصل بنا",
-          heroEyebrow: "تواصلكم مع الأردن",
-          heroTitle: "الخدمات الخارجية والقنصلية، بطريقة أسهل.",
-          heroText:
-            "تعرّف على الخدمات القنصلية ومتطلبات الوثائق وسبل مساعدة المواطنين الأردنيين في الخارج. تتضمن هذه البوابة التجريبية أداة الدعم الرقمي من Genesys Cloud.",
-          heroPrimary: "استعراض الخدمات",
-          heroSecondary: "تحدث مع الدعم",
-          heroClickToDialText: "اطلب مكالمة",
-          cardTitle: "كيف يمكننا مساعدتك؟",
-          cardText:
-            "تساعد تجربة الدعم الرقمي الزوار في الوصول إلى المعلومات المناسبة والتواصل مع الفريق المختص.",
-          cardStatus: "أداة الدعم من Genesys مهيأة لهذه النسخة التجريبية",
-          servicesEyebrow: "المعلومات والدعم",
-          servicesTitle: "استكشف خدماتنا",
-          servicesText:
-            "اختر موضوعًا لمعرفة المزيد. هذه البطاقات تجريبية ويمكن استبدالها بالمحتوى المعتمد من وزارة الخارجية الأردنية.",
-          s1Title: "جوازات السفر ووثائق السفر",
-          s1Text:
-            "معلومات عامة حول وثائق السفر وتجديدها والإجراءات القنصلية ذات الصلة.",
-          s2Title: "تصديق الوثائق والمستندات",
-          s2Text:
-            "تعرّف على تصديق الوثائق والشهادات والمعلومات المطلوبة قبل تقديم الطلب.",
-          s3Title: "مساعدة المواطنين في الخارج",
-          s3Text:
-            "إرشادات للتواصل مع السفارات أو القنصليات الأردنية للحصول على المساعدة أثناء وجودكم خارج المملكة.",
-          noticeTitle: "موقع تجريبي",
-          noticeText:
-            "هذه صفحة تجريبية لاختبار نشر أداة المحادثة من Genesys Cloud. هذا ليس موقعًا حكوميًا رسميًا، ويجب استبدال المعلومات التجريبية بمحتوى معتمد من وزارة الخارجية الأردنية قبل النشر العام.",
-          footerTitle: "وزارة الخارجية الأردنية · تجربة الخدمات الرقمية",
-          footerText:
-            "صفحة أولية لاختبار نشر Genesys Cloud والتحقق من عمل الأداة.",
-          footerRight: "© بوابة تجريبية · ليست موقعًا حكوميًا رسميًا",
-          langBtn: "English",
-        },
+    const translations = {
+      en: {
+        topText: 'The Hashemite Kingdom of Jordan · Ministry of Foreign Affairs and Expatriates',
+        brandTitle: 'MINISTRY OF FOREIGN AFFAIRS', brandSub: 'The Hashemite Kingdom of Jordan · Demo Portal',
+        navServices: 'Services', navConsular: 'Consular Assistance', navContact: 'Contact',
+        heroEyebrow: 'YOUR CONNECTION TO JORDAN', heroTitle: 'Foreign affairs and consular services, made easier.',
+        heroText: 'Find information about consular services, document requirements, and assistance for Jordanian citizens abroad. This demonstration portal includes a Genesys Cloud digital support widget.',
+        heroPrimary: 'Explore services', heroSecondary: 'Chat with support', heroClickToDialText: 'Click to Dial', cardTitle: 'How can we assist you?',
+        cardText: 'Our digital support experience can help visitors find the right information and connect with the appropriate team.',
+        cardStatus: 'Digital support widget configured for this demo', servicesEyebrow: 'INFORMATION & SUPPORT',
+        servicesTitle: 'Explore our services', servicesText: 'Choose a topic to learn more. These sample service cards are placeholders for your final MOFA Jordan content.',
+        s1Title: 'Passports & Travel Documents', s1Text: 'General information about travel documents, renewals, and related consular procedures.',
+        s2Title: 'Attestations & Documents', s2Text: 'Learn about document attestation, certificates, and the information you may need before applying.',
+        s3Title: 'Citizen Assistance Abroad', s3Text: 'Find guidance on contacting a Jordanian embassy or consulate for assistance while overseas.',
+        noticeTitle: 'Demonstration website', noticeText: 'This is a sample deployment page for testing the Genesys Cloud web messenger. It is not an official government website, and the sample service information should be replaced with approved MOFA Jordan content before public use.',
+        footerTitle: 'MOFA Jordan · Digital Services Demo', footerText: 'A prototype page for Genesys Cloud deployment and widget validation.',
+        footerRight: '© Demo portal · Not an official government website', langBtn: 'العربية'
+      },
+      ar: {
+        topText: 'المملكة الأردنية الهاشمية · وزارة الخارجية وشؤون المغتربين',
+        brandTitle: 'وزارة الخارجية وشؤون المغتربين', brandSub: 'المملكة الأردنية الهاشمية · بوابة تجريبية',
+        navServices: 'الخدمات', navConsular: 'المساعدة القنصلية', navContact: 'اتصل بنا',
+        heroEyebrow: 'تواصلكم مع الأردن', heroTitle: 'الخدمات الخارجية والقنصلية، بطريقة أسهل.',
+        heroText: 'تعرّف على الخدمات القنصلية ومتطلبات الوثائق وسبل مساعدة المواطنين الأردنيين في الخارج. تتضمن هذه البوابة التجريبية أداة الدعم الرقمي من Genesys Cloud.',
+        heroPrimary: 'استعراض الخدمات', heroSecondary: 'تحدث مع الدعم', heroClickToDialText: 'اطلب مكالمة', cardTitle: 'كيف يمكننا مساعدتك؟',
+        cardText: 'تساعد تجربة الدعم الرقمي الزوار في الوصول إلى المعلومات المناسبة والتواصل مع الفريق المختص.',
+        cardStatus: 'أداة الدعم من Genesys مهيأة لهذه النسخة التجريبية', servicesEyebrow: 'المعلومات والدعم',
+        servicesTitle: 'استكشف خدماتنا', servicesText: 'اختر موضوعًا لمعرفة المزيد. هذه البطاقات تجريبية ويمكن استبدالها بالمحتوى المعتمد من وزارة الخارجية الأردنية.',
+        s1Title: 'جوازات السفر ووثائق السفر', s1Text: 'معلومات عامة حول وثائق السفر وتجديدها والإجراءات القنصلية ذات الصلة.',
+        s2Title: 'تصديق الوثائق والمستندات', s2Text: 'تعرّف على تصديق الوثائق والشهادات والمعلومات المطلوبة قبل تقديم الطلب.',
+        s3Title: 'مساعدة المواطنين في الخارج', s3Text: 'إرشادات للتواصل مع السفارات أو القنصليات الأردنية للحصول على المساعدة أثناء وجودكم خارج المملكة.',
+        noticeTitle: 'موقع تجريبي', noticeText: 'هذه صفحة تجريبية لاختبار نشر أداة المحادثة من Genesys Cloud. هذا ليس موقعًا حكوميًا رسميًا، ويجب استبدال المعلومات التجريبية بمحتوى معتمد من وزارة الخارجية الأردنية قبل النشر العام.',
+        footerTitle: 'وزارة الخارجية الأردنية · تجربة الخدمات الرقمية', footerText: 'صفحة أولية لاختبار نشر Genesys Cloud والتحقق من عمل الأداة.',
+        footerRight: '© بوابة تجريبية · ليست موقعًا حكوميًا رسميًا', langBtn: 'English'
+      }
+    };
+    // Config: public backend URL only. Never put a Genesys OAuth secret in this HTML.
+
+    const WEBSITE_CALLBACK_ENDPOINT = 'https://callback-api-g1s5.onrender.com/api/click-to-dial';
+    const TURNSTILE_SITE_KEY = 'REPLACE_WITH_PUBLIC_TURNSTILE_SITE_KEY';
+    const callStrings = {
+      en: {
+        title: 'Request a phone call', intro: 'Enter your phone number to request a callback. Jordanian numbers are supported in local format; other countries require +country code.',
+        phoneLabel: 'Phone number', phoneHint: 'Jordan: 0791234567 · International: +country code and number (e.g. +971...)',
+        consent: 'I confirm this is my number and agree to receive a telephone call.',
+        submit: 'Request a call', pending: 'Submitting your callback request...',
+        success: 'Your callback request was submitted. Please keep your phone available.',
+        invalid: 'Enter a valid phone number. For numbers outside Jordan, include + and the country code.',
+        consentRequired: 'Please confirm that this is your phone number.',
+        rejected: 'We could not submit your request. Please try again later or use the chat.',
+        rateLimit: 'Please wait before requesting another call.',
+        network: 'Cannot connect to the callback service. Please try again shortly.',
+        botCheck: 'Complete the security check before requesting a call.',
+        safety: 'For testing only. Do not use for emergencies.', close: 'Close',
+      },
+      ar: {
+        title: 'اطلب مكالمة هاتفية', intro: 'أدخل رقم هاتفك لطلب مكالمة. للأردن استخدم الصيغة المحلية، وللدول الأخرى أضف رمز الدولة مع +.',
+        phoneLabel: 'رقم الهاتف', phoneHint: 'الأردن: 0791234567 · خارج الأردن: + ثم رمز الدولة والرقم، مثل +971...',
+        consent: 'أؤكد أن هذا رقم هاتفي وأوافق على استلام مكالمة هاتفية.',
+        submit: 'اطلب مكالمة', pending: 'جاري إرسال طلب المكالمة...',
+        success: 'تم إرسال طلب المكالمة. يرجى إبقاء هاتفك متاحاً.',
+        invalid: 'يرجى إدخال رقم هاتف صحيح، وللأرقام خارج الأردن أضف + ورمز الدولة.',
+        consentRequired: 'يرجى تأكيد ملكيتك لرقم الهاتف.',
+        rejected: 'تعذّر إرسال الطلب. حاول لاحقاً أو تواصل معنا عبر المحادثة.',
+        rateLimit: 'يرجى الانتظار قبل إرسال طلب مكالمة آخر.',
+        network: 'تعذّر الاتصال بخدمة المكالمات. حاول مرة أخرى بعد قليل.',
+        botCheck: 'يرجى إكمال التحقق الأمني قبل طلب المكالمة.',
+        safety: 'للتجربة فقط. ليست خدمة طوارئ.', close: 'إغلاق',
+      },
+    };
+    let callReturnFocus = null;
+    let callTurnstileWidgetId = null;
+    function prepareTurnstile() {
+      if (document.getElementById('callModal').hidden) return;
+      if (callTurnstileWidgetId !== null || !window.turnstile) return;
+      if (TURNSTILE_SITE_KEY.startsWith('REPLACE_')) return;
+      callTurnstileWidgetId = window.turnstile.render('#callTurnstile', {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: 'auto'
+      });
+    }
+    const turnstileScript = document.createElement('script');
+    turnstileScript.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    turnstileScript.async = true;
+    turnstileScript.defer = true;
+    turnstileScript.onload = prepareTurnstile;
+    document.head.appendChild(turnstileScript);
+    function localizeCallModal() {
+      const t = callStrings[document.documentElement.lang === 'ar' ? 'ar' : 'en'];
+      const mapping = {
+        callModalTitle: 'title', callModalIntro: 'intro', callPhoneLabel: 'phoneLabel',
+        callPhoneHint: 'phoneHint', callConsentText: 'consent', callSafetyNote: 'safety',
       };
-      // Config: public backend URL only. Never put a Genesys OAuth secret in this HTML.
-
-      const WEBSITE_CALLBACK_ENDPOINT =
-        "https://callback-api-g1s5.onrender.com/api/click-to-dial";
-      const callStrings = {
-        en: {
-          title: "Request a phone call",
-          intro:
-            "Enter your Jordanian phone number and we will request a callback from our support team.",
-          phoneLabel: "Jordanian phone number",
-          phoneHint:
-            "Mobile or landline, for example 0791234567 or +962791234567.",
-          consent:
-            "I confirm this is my number and agree to receive a telephone call.",
-          submit: "Request a call",
-          pending: "Submitting your callback request...",
-          success:
-            "Your callback request was submitted. Please keep your phone available.",
-          invalid: "Enter a valid Jordanian mobile or landline number.",
-          consentRequired: "Please confirm that this is your phone number.",
-          rejected:
-            "We could not submit your request. Please try again later or use the chat.",
-          rateLimit: "Please wait before requesting another call.",
-          network:
-            "Cannot connect to the callback service. Please try again shortly.",
-          safety: "For testing only. Do not use for emergencies.",
-          close: "Close",
-        },
-        ar: {
-          title: "اطلب مكالمة هاتفية",
-          intro: "أدخل رقم هاتفك الأردني لطلب مكالمة من فريق الدعم.",
-          phoneLabel: "رقم الهاتف الأردني",
-          phoneHint: "رقم خلوي أو أرضي، مثل 0791234567 أو +962791234567.",
-          consent: "أؤكد أن هذا رقم هاتفي وأوافق على استلام مكالمة هاتفية.",
-          submit: "اطلب مكالمة",
-          pending: "جاري إرسال طلب المكالمة...",
-          success: "تم إرسال طلب المكالمة. يرجى إبقاء هاتفك متاحاً.",
-          invalid: "يرجى إدخال رقم هاتف أردني صحيح (خلوي أو أرضي).",
-          consentRequired: "يرجى تأكيد ملكيتك لرقم الهاتف.",
-          rejected:
-            "تعذّر إرسال الطلب. حاول لاحقاً أو تواصل معنا عبر المحادثة.",
-          rateLimit: "يرجى الانتظار قبل إرسال طلب مكالمة آخر.",
-          network: "تعذّر الاتصال بخدمة المكالمات. حاول مرة أخرى بعد قليل.",
-          safety: "للتجربة فقط. ليست خدمة طوارئ.",
-          close: "إغلاق",
-        },
-      };
-      let callReturnFocus = null;
-      function localizeCallModal() {
-        const t =
-          callStrings[document.documentElement.lang === "ar" ? "ar" : "en"];
-        const mapping = {
-          callModalTitle: "title",
-          callModalIntro: "intro",
-          callPhoneLabel: "phoneLabel",
-          callPhoneHint: "phoneHint",
-          callConsentText: "consent",
-          callSafetyNote: "safety",
-        };
-        Object.entries(mapping).forEach(([id, key]) => {
-          document.getElementById(id).textContent = t[key];
+      Object.entries(mapping).forEach(([id, key]) => { document.getElementById(id).textContent = t[key]; });
+      const submit = document.getElementById('callSubmit');
+      if (!submit.disabled) submit.textContent = t.submit;
+      document.getElementById('closeCallModal').setAttribute('aria-label', t.close);
+      document.getElementById('callStatus').textContent = '';
+      document.getElementById('callStatus').className = 'call-status';
+      document.querySelector('.call-dialog').dir = document.documentElement.lang === 'ar' ? 'rtl' : 'ltr';
+    }
+    function openCallModal() {
+      callReturnFocus = document.activeElement;
+      localizeCallModal();
+      document.getElementById('callModal').hidden = false;
+      prepareTurnstile();
+      document.getElementById('callPhone').focus();
+    }
+    function closeCallModal() {
+      document.getElementById('callModal').hidden = true;
+      if (callReturnFocus && typeof callReturnFocus.focus === 'function') callReturnFocus.focus();
+    }
+    document.getElementById('callModal').addEventListener('click', e => {
+      if (e.target.id === 'callModal') closeCallModal();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !document.getElementById('callModal').hidden) closeCallModal();
+    });
+    // Jordan local numbers are normalized to E.164; other countries must use +countrycode.
+    // The server performs the authoritative international validation.
+    function normalizeInternationalPhone(input) {
+      let n = String(input || '').trim().replace(/[\s().-]/g, '');
+      if (n.startsWith('00')) n = '+' + n.slice(2);
+      else if (n.startsWith('962')) n = '+' + n;
+      else if (n.startsWith('0')) n = '+962' + n.slice(1);
+      if (!/^\+[1-9]\d{6,14}$/.test(n)) return null;
+      return n;
+    }
+    document.getElementById('callRequestForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const t = callStrings[document.documentElement.lang === 'ar' ? 'ar' : 'en'];
+      const statusEl = document.getElementById('callStatus');
+      const number = normalizeInternationalPhone(document.getElementById('callPhone').value);
+      const consent = document.getElementById('callConsent').checked;
+      const submit = document.getElementById('callSubmit');
+      function showStatus(message, type) { statusEl.textContent = message; statusEl.className = 'call-status ' + type; }
+      if (!number) return showStatus(t.invalid, 'error');
+      if (!consent) return showStatus(t.consentRequired, 'error');
+      const turnstileToken = callTurnstileWidgetId !== null && window.turnstile ? window.turnstile.getResponse(callTurnstileWidgetId) : '';
+      if (!turnstileToken) return showStatus(t.botCheck, 'error');
+      submit.disabled = true;
+      submit.textContent = t.pending;
+      showStatus(t.pending, '');
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 90000); // Render Free may cold-start.
+      try {
+        const response = await fetch(WEBSITE_CALLBACK_ENDPOINT, {
+          method: 'POST', mode: 'cors', credentials: 'omit',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phoneNumber: number, consent: true, turnstileToken }),
+          signal: controller.signal,
         });
-        const submit = document.getElementById("callSubmit");
-        if (!submit.disabled) submit.textContent = t.submit;
-        document
-          .getElementById("closeCallModal")
-          .setAttribute("aria-label", t.close);
-        document.getElementById("callStatus").textContent = "";
-        document.getElementById("callStatus").className = "call-status";
-        document.querySelector(".call-dialog").dir =
-          document.documentElement.lang === "ar" ? "rtl" : "ltr";
+        if (response.ok) {
+          showStatus(t.success, 'success');
+          document.getElementById('callPhone').value = '';
+          document.getElementById('callConsent').checked = false;
+        } else if (response.status === 429) {
+          showStatus(t.rateLimit, 'error');
+        } else {
+          showStatus(t.rejected, 'error');
+        }
+      } catch (err) {
+        showStatus(t.network, 'error');
+      } finally {
+        if (callTurnstileWidgetId !== null && window.turnstile) window.turnstile.reset(callTurnstileWidgetId);
+        clearTimeout(timer);
+        submit.disabled = false;
+        submit.textContent = callStrings[document.documentElement.lang === 'ar' ? 'ar' : 'en'].submit;
       }
-      function openCallModal() {
-        callReturnFocus = document.activeElement;
-        localizeCallModal();
-        document.getElementById("callModal").hidden = false;
-        document.getElementById("callPhone").focus();
-      }
-      function closeCallModal() {
-        document.getElementById("callModal").hidden = true;
-        if (callReturnFocus && typeof callReturnFocus.focus === "function")
-          callReturnFocus.focus();
-      }
-      document.getElementById("callModal").addEventListener("click", (e) => {
-        if (e.target.id === "callModal") closeCallModal();
-      });
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && !document.getElementById("callModal").hidden)
-          closeCallModal();
-      });
-      // Jordan number format: mobile 074–079 and geographic 02/03/05/06, normalized to E.164.
-      function normalizeJordanPhone(input) {
-        let n = String(input || "")
-          .trim()
-          .replace(/[\s().-]/g, "");
-        if (n.startsWith("00962")) n = "+962" + n.slice(5);
-        else if (n.startsWith("962")) n = "+" + n;
-        else if (n.startsWith("0")) n = "+962" + n.slice(1);
-        if (!/^\+962(?:7[4-9]\d{7}|[2356]\d{7})$/.test(n)) return null;
-        return n;
-      }
-      document
-        .getElementById("callRequestForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const t =
-            callStrings[document.documentElement.lang === "ar" ? "ar" : "en"];
-          const statusEl = document.getElementById("callStatus");
-          const number = normalizeJordanPhone(
-            document.getElementById("callPhone").value,
-          );
-          const consent = document.getElementById("callConsent").checked;
-          const submit = document.getElementById("callSubmit");
-          function showStatus(message, type) {
-            statusEl.textContent = message;
-            statusEl.className = "call-status " + type;
-          }
-          if (!number) return showStatus(t.invalid, "error");
-          if (!consent) return showStatus(t.consentRequired, "error");
-          submit.disabled = true;
-          submit.textContent = t.pending;
-          showStatus(t.pending, "");
-          const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 90000); // Render Free may cold-start.
-          try {
-            const response = await fetch(WEBSITE_CALLBACK_ENDPOINT, {
-              method: "POST",
-              mode: "cors",
-              credentials: "omit",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ phoneNumber: number, consent: true }),
-              signal: controller.signal,
-            });
-            if (response.ok) {
-              showStatus(t.success, "success");
-              document.getElementById("callPhone").value = "";
-              document.getElementById("callConsent").checked = false;
-            } else if (response.status === 429) {
-              showStatus(t.rateLimit, "error");
-            } else {
-              showStatus(t.rejected, "error");
-            }
-          } catch (err) {
-            showStatus(t.network, "error");
-          } finally {
-            clearTimeout(timer);
-            submit.disabled = false;
-            submit.textContent =
-              callStrings[
-                document.documentElement.lang === "ar" ? "ar" : "en"
-              ].submit;
-          }
-        });
+    });
 
-      const currentLang = document.documentElement.lang === "ar" ? "ar" : "en";
 
-      // Render the saved language on initial load (including after language changes).
-      function renderLanguage(language) {
-        const t = translations[language];
-        document.documentElement.lang = language;
-        document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
-        Object.keys(t).forEach((id) => {
-          const el = document.getElementById(id);
-          if (el) el.textContent = t[id];
-        });
-      }
-      renderLanguage(currentLang);
+    const currentLang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
 
-      document.getElementById("langBtn").addEventListener("click", () => {
-        const nextLang = document.documentElement.lang === "en" ? "ar" : "en";
-        localStorage.setItem("mofaDemoLanguage", nextLang);
-        // Genesys detects the page direction on initialization. Reloading after
-        // switching direction ensures its configured Auto alignment is applied.
-        window.location.reload();
+    // Render the saved language on initial load (including after language changes).
+    function renderLanguage(language) {
+      const t = translations[language];
+      document.documentElement.lang = language;
+      document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+      Object.keys(t).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = t[id];
       });
-    </script>
-  </body>
+    }
+    renderLanguage(currentLang);
+
+    document.getElementById('langBtn').addEventListener('click', () => {
+      const nextLang = document.documentElement.lang === 'en' ? 'ar' : 'en';
+      localStorage.setItem('mofaDemoLanguage', nextLang);
+      // Genesys detects the page direction on initialization. Reloading after
+      // switching direction ensures its configured Auto alignment is applied.
+      window.location.reload();
+    });
+  </script>
+</body>
 </html>
